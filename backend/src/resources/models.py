@@ -5,6 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 class UserBase(SQLModel):
 	name: str = Field(max_length=20)
 	email: EmailStr = Field(max_length=50)
+	is_admin: bool = Field(default=False)
 
 
 class User(UserBase, table=True):
@@ -27,6 +28,7 @@ class UserUpdate(SQLModel):
 	name: str | None = Field(default=None, max_length=20)
 	email: EmailStr | None = Field(default=None, max_length=50)
 	password: str | None = Field(default=None, max_length=20)
+	is_admin: bool | None = Field(default=None)
 
 
 class ItemBase(SQLModel):
