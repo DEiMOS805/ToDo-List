@@ -6,7 +6,7 @@ from src.resources.error_handlers import http_exception_handler
 
 
 ############################### Route Handlers ################################
-app.include_router(router=items.router, prefix="/items", tags=["Items"])
+app.include_router(router=items.router, tags=["Items"])
 app.include_router(router=users.router, prefix="/users", tags=["Users"])
 
 ############################### Error Handlers ################################
