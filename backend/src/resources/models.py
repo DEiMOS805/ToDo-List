@@ -1,4 +1,5 @@
-from pydantic import EmailStr, BaseModel
+from datetime import datetime
+from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
 
 
@@ -7,7 +8,7 @@ from sqlmodel import SQLModel, Field, Relationship
 ###############################################################################
 class UserBase(SQLModel):
 	username: str = Field(max_length=20)
-	email: EmailStr = Field(max_length=50)
+	email: EmailStr = Field(max_length=50, unique=True)
 	disabled: bool = Field(default=False)
 	is_admin: bool = Field(default=False)
 
@@ -17,21 +18,27 @@ class User(UserBase, table=True):
 
 	id: int | None = Field(default=None, primary_key=True)
 	password: bytes
-	items: list["Item"] = Relationship(back_populates="users")
+	write_datetime: datetime = Field(default_factory=datetime.now)
+	creation_datetime: datetime = Field(default_factory=datetime.now)
+
+	todos: list["ToDo"] = Relationship(back_populates="users")
 
 
 class UserPublic(UserBase):
 	id: int = Field(gt=0)
+	write_datetime: str
+	creation_datetime: str
 
 
 class UserCreate(UserBase):
 	model_config = {"extra": "forbid"}
+
 	password: str = Field(max_length=20)
 
 
 class UserUpdate(SQLModel):
 	username: str | None = Field(default=None, max_length=20)
-	email: EmailStr | None = Field(default=None, max_length=50)
+	email: EmailStr | None = Field(default=None, max_length=50, unique=True)
 	password: str | None = Field(default=None, max_length=20)
 	disabled: bool | None = Field(default=None)
 	is_admin: bool | None = Field(default=None)
@@ -40,34 +47,35 @@ class UserUpdate(SQLModel):
 ###############################################################################
 ################################## To-Dos #####################################
 ###############################################################################
-class ItemBase(SQLModel):
-	title: str = Field(max_length=20)
+class ToDoBase(SQLModel):
 	description: str = Field(max_length=100)
 	done: bool = Field(default=False)
+	is_favorite: bool = Field(default=False)
 
 
-class Item(ItemBase, table=True):
-	__tablename__ = "items"
+class ToDo(ToDoBase, table=True):
+	__tablename__ = "todos"
 
 	id: int | None = Field(default=None, primary_key=True)
 	user_id: int | None = Field(default=None, foreign_key="users.id")
-	users: User | None = Relationship(back_populates="items")
+	reminder_datetime: datetime | None = Field(default=None, nullable=True)
+	expiration_datetime: datetime | None = Field(default=None, nullable=True)
+	write_datetime: datetime = Field(default_factory=datetime.now)
+	creation_datetime: datetime = Field(default_factory=datetime.now)
+
+	users: User | None = Relationship(back_populates="todos")
 
 
-class ItemUpdate(SQLModel):
-	title: str | None = Field(default=None, max_length=20)
+class ToDoCreate(ToDoBase):
+	model_config = {"extra": "forbid"}
+
+	reminder_datetime: str | None = Field(default=None)
+	expiration_datetime: str | None = Field(default=None)
+
+
+class ToDoUpdate(SQLModel):
 	description: str | None = Field(default=None, max_length=100)
 	done: bool | None = False
-
-
-###############################################################################
-################################## Token ######################################
-###############################################################################
-class Token(BaseModel):
-	access_token: str
-	token_type: str
-
-
-class TokenData(BaseModel):
-	username: str | None = None
-	is_admin: bool | None = None
+	is_favorite: bool | None = False
+	reminder_datetime: str | None = None
+	expiration_datetime: str | None = None
