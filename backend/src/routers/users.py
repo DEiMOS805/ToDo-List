@@ -6,8 +6,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Path, Query, Body, Depends, HTTPException, status
 
 from src.resources.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from src.resources.models import User, UserPublic, UserCreate, UserUpdate
 from src.resources.dependencies import SessionDep, get_current_active_user
-from src.resources.models import User, UserPublic, UserCreate, UserUpdate, Token
 from src.resources.functions import encrypt, create_access_token, authenticate_user
 
 
@@ -58,15 +58,14 @@ async def auth_user(
 		data={"sub": user.username},
 		expires_delta=token_expire
 	)
-	token = Token(access_token=token, token_type="Bearer")
 
 	return JSONResponse(
 		status_code=status.HTTP_201_CREATED,
 		content={
 			"status": "Success",
 			"message": "Access token created successfully!",
-			"access_token": token.access_token,
-			"token_type": token.token_type
+			"access_token": token,
+			"token_type": "Bearer"
 		}
 	)
 
