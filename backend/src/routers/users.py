@@ -1,6 +1,8 @@
 from sqlmodel import select
 from datetime import timedelta
 from typing import Any, Annotated, Sequence
+
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Path, Query, Body, Depends, HTTPException, status
@@ -27,11 +29,11 @@ async def create_user(user: UserCreate, session: SessionDep) -> JSONResponse:
 
 	return JSONResponse(
 		status_code=status.HTTP_201_CREATED,
-		content={
+		content=jsonable_encoder({
 			"status": "Success",
 			"message": "User created successfully!",
 			"user": UserPublic(**user_db.model_dump()).model_dump()
-		}
+		})
 	)
 
 
@@ -61,12 +63,12 @@ async def auth_user(
 
 	return JSONResponse(
 		status_code=status.HTTP_201_CREATED,
-		content={
+		content=jsonable_encoder({
 			"status": "Success",
 			"message": "Access token created successfully!",
 			"access_token": token,
 			"token_type": "Bearer"
-		}
+		})
 	)
 
 
@@ -96,11 +98,11 @@ async def get_users(
 
 	return JSONResponse(
 		status_code=status.HTTP_200_OK,
-		content={
+		content=jsonable_encoder({
 			"status": "Success",
 			"message": "Items retrieved successfully!",
 			"items": users_list,
-		}
+		})
 	)
 
 
@@ -126,11 +128,11 @@ async def get_user(
 
 	return JSONResponse(
 		status_code=status.HTTP_200_OK,
-		content={
+		content=jsonable_encoder({
 			"status": "Success",
 			"message": "User retrieved successfully!",
 			"user": UserPublic(**user_db.model_dump()).model_dump()
-		}
+		})
 	)
 
 
@@ -169,11 +171,11 @@ async def patch_user(
 
 	return JSONResponse(
 		status_code=status.HTTP_200_OK,
-		content={
+		content=jsonable_encoder({
 			"status": "Success",
 			"message": "User patched successfully!",
 			"user": UserPublic(**user_db.model_dump()).model_dump()
-		}
+		})
 	)
 
 
