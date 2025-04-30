@@ -26,8 +26,8 @@ class User(UserBase, table=True):
 
 class UserPublic(UserBase):
 	id: int = Field(gt=0)
-	write_datetime: str
-	creation_datetime: str
+	write_datetime: datetime
+	creation_datetime: datetime
 
 
 class UserCreate(UserBase):
