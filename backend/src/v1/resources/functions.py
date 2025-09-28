@@ -30,65 +30,65 @@ def decrypt(bytes_str: bytes) -> str:
 
 
 def verify_password(password: str, hashed_password: bytes) -> bool:
-    return password == decrypt(hashed_password)
+	return password == decrypt(hashed_password)
 
 
 def authenticate_user(
-    session: SessionDep,
-    username: str,
-    password: str
+	session: SessionDep,
+	username: str,
+	password: str
 ) -> User | bool:
 
-    user: User | None = session.exec(
-        select(User).where(User.username == username)
-    ).first()
+	user: User | None = session.exec(
+		select(User).where(User.username == username)
+	).first()
 
-    if not user:
-        return False
-    if not verify_password(password, user.password):
-        return False
+	if not user:
+		return False
+	if not verify_password(password, user.password):
+		return False
 
-    return user
+	return user
 
 
 def create_access_token(
-    data: dict[str, Any],
-    expires_delta: timedelta | None = None
+	data: dict[str, Any],
+	expires_delta: timedelta | None = None
 ) -> str:
 
-    to_encode: dict[str, Any] = data.copy()
+	to_encode: dict[str, Any] = data.copy()
 
-    if expires_delta:
-        expire: datetime = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire: datetime = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+	if expires_delta:
+		expire: datetime = datetime.now(timezone.utc) + expires_delta
+	else:
+		expire: datetime = datetime.now(timezone.utc) + timedelta(minutes=15)
+	to_encode.update({"exp": expire})
 
-    return encode(to_encode, str(getenv("JWT_SECRET")), algorithm=ALGORITHM)
+	return encode(to_encode, str(getenv("JWT_SECRET")), algorithm=ALGORITHM)
 
 
 ###############################################################################
 ################################## To-Dos #####################################
 ###############################################################################
 def format_todo_response(todo: ToDo) -> dict[str, Any]:
-    return {
-        **todo.model_dump(),
-        "reminder_datetime": (
-            todo.reminder_datetime.isoformat()
-            if todo.reminder_datetime else None
-        ),
-        "expiration_datetime": (
-            todo.expiration_datetime.isoformat()
-            if todo.expiration_datetime
-            else None
-        ),
-        "write_datetime": todo.write_datetime.isoformat(),
-        "creation_datetime": todo.creation_datetime.isoformat(),
-    }
+	return {
+		**todo.model_dump(),
+		"reminder_datetime": (
+			todo.reminder_datetime.isoformat()
+			if todo.reminder_datetime else None
+		),
+		"expiration_datetime": (
+			todo.expiration_datetime.isoformat()
+			if todo.expiration_datetime
+			else None
+		),
+		"write_datetime": todo.write_datetime.isoformat(),
+		"creation_datetime": todo.creation_datetime.isoformat(),
+	}
 
 
 def map_todo_list(todo_list: Sequence[ToDo]) -> list[dict[str, Any]]:
-    return list(
+	return list(
 		map(
 			lambda todo: {
 				**todo.model_dump(),
