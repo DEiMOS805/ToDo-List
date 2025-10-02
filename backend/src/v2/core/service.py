@@ -27,7 +27,12 @@ def get_model_schema_for_docs(
 	"""
 	result: dict[int, dict[str, Any]] = {}
 	example: dict[str, Any] = model.model_json_schema().get("properties", {})
+
 	for status_code, description in responses.items():
+		if status_code in [204, 304]:
+			result[status_code] = {"description": description}
+			continue
+
 		result[status_code] = {
 			"description": description,
 			"model": model,
@@ -65,7 +70,7 @@ def make_response(
 	"""
 
 	response: dict[str, Any] = BaseResponse(
-		success=False,
+		success=success,
 		message=message,
 		data=data,
 		error=ExceptionError(

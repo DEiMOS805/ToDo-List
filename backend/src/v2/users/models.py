@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime
 from pydantic import EmailStr
 from sqlmodel import SQLModel, Field, Relationship
@@ -17,10 +18,10 @@ class UserCreate(UserBase):
 class User(UserBase, table=True):
 	__tablename__ = "users"
 
-	id: int | None = Field(default=None, primary_key=True)
+	id: Optional[int] = Field(default=None, primary_key=True)
 	password_hash: str = Field(max_length=255)
 	created_at: datetime = Field(default_factory=datetime.now)
-	updated_at: datetime | None = Field(default_factory=datetime.now)
+	updated_at: datetime = Field(default_factory=datetime.now)
 
 	# class Config:
 	# 	from_attributes = True

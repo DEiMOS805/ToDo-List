@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
 	title="ToDo List Backend Service",
 	summary="A backend service to manage ToDo Lists",
-	version="2.0.0",
+	version=APP_VERSION,
 	lifespan=lifespan
 )
 

@@ -1,11 +1,13 @@
 import hashlib
 import secrets
+from typing import Optional
 from datetime import datetime
-from typing import Optional, List
+from sqlalchemy import Update
 from abc import ABC, abstractmethod
-from sqlmodel import Session, select
 from logging import Logger, getLogger
+from sqlmodel import Session, select, update
 
+from .config import *
 from .models import User, UserCreate, UserPublic
 
 from .. core.config import *
@@ -26,23 +28,15 @@ class RepositoryInterface(ABC):
 		pass
 
 	@abstractmethod
-	async def get_by_id(self, user_id: int) -> Optional[UserPublic]:
+	async def get_all(self, skip: int = PAGINATION_OFFSET, limit: int = PAGINATION_LIMIT) -> list[Optional[UserPublic]]:
 		pass
 
 	@abstractmethod
-	async def get_by_username(self, username: str) -> Optional[UserPublic]:
+	async def get(self, user_id: int) -> Optional[UserPublic]:
 		pass
 
 	@abstractmethod
-	async def get_by_email(self, email: str) -> Optional[UserPublic]:
-		pass
-
-	@abstractmethod
-	async def get_all(self, skip: int = 0, limit: int = 100) -> List[UserPublic]:
-		pass
-
-	@abstractmethod
-	async def update(self, user_id: int, user_data: dict) -> Optional[UserPublic]:
+	async def patch(self, user_id: int, user_data: dict) -> UserPublic:
 		pass
 
 	@abstractmethod
@@ -81,6 +75,16 @@ class SqlRepository(RepositoryInterface):
 		except ValueError:
 			return False
 
+	async def exists_by_username(self, username: str) -> bool:
+		statement = select(User).where(User.username == username)
+		user = self.session.exec(statement).first()
+		return user is not None
+
+	async def exists_by_email(self, email: str) -> bool:
+		statement = select(User).where(User.email == email)
+		user = self.session.exec(statement).first()
+		return user is not None
+
 	def _user_to_public(self, user: User) -> UserPublic:
 		return UserPublic(
 			id=user.id,
@@ -92,15 +96,15 @@ class SqlRepository(RepositoryInterface):
 			updated_at=user.updated_at
 		)
 
-	async def create(self, user_data: UserCreate) -> UserPublic:
-		logger.debug(f"Creating user in DB")
-		hashed_password: str = self._hash_password(user_data.password)
+	async def create(self, data: UserCreate) -> UserPublic:
+		logger.info(f"Creating user in DB")
+		hashed_password: str = self._hash_password(data.password)
 
 		db_user = User(
-			username=user_data.username,
-			email=user_data.email,
+			username=data.username,
+			email=data.email,
 			password_hash=hashed_password,
-			is_admin=user_data.is_admin
+			is_admin=data.is_admin
 		)
 
 		self.session.add(db_user)
@@ -109,64 +113,48 @@ class SqlRepository(RepositoryInterface):
 
 		return self._user_to_public(db_user)
 
-	async def get_by_id(self, user_id: int) -> Optional[UserPublic]:
-		"""Get user by ID"""
-		statement = select(User).where(User.id == user_id)
-		user = self.session.exec(statement).first()
+	async def get_all(
+		self,
+		offset: int = PAGINATION_OFFSET,
+		limit: int = PAGINATION_LIMIT
+	) -> list[Optional[UserPublic]]:
 
-		if user:
-			return self._user_to_public(user)
-		return None
-
-	async def get_by_username(self, username: str) -> Optional[UserPublic]:
-		"""Get user by username"""
-		statement = select(User).where(User.username == username)
-		user = self.session.exec(statement).first()
-
-		if user:
-			return self._user_to_public(user)
-		return None
-
-	async def get_by_email(self, email: str) -> Optional[UserPublic]:
-		"""Get user by email"""
-		statement = select(User).where(User.email == email)
-		user = self.session.exec(statement).first()
-
-		if user:
-			return self._user_to_public(user)
-		return None
-
-	async def get_all(self, skip: int = 0, limit: int = 100) -> List[UserPublic]:
-		"""Get all users with pagination"""
-		statement = select(User).offset(skip).limit(limit)
+		logger.info(f"Retrieving all users from DB with offset={offset} and limit={limit}")
+		statement = select(User).offset(offset).limit(limit)
 		users = self.session.exec(statement).all()
 
 		return [self._user_to_public(user) for user in users]
 
-	async def update(self, user_id: int, user_data: dict) -> Optional[UserPublic]:
-		"""Update user"""
-		statement = select(User).where(User.id == user_id)
-		user = self.session.exec(statement).first()
+	async def get(self, id: int) -> Optional[UserPublic]:
+		logger.info(f"Retrieving user with ID: {id} from DB")
+		statement = select(User).where(User.id == id)
+		user: Optional[User] = self.session.exec(statement).first()
 
-		if not user:
-			return None
+		if user:
+			return self._user_to_public(user)
+		return None
 
-		# Update fields
-		for key, value in user_data.items():
-			if hasattr(user, key) and key != 'id':
-				setattr(user, key, value)
+	async def patch(self, id: int, data: dict[str, Any]) -> UserPublic:
+		logger.info(f"Updating user with ID: {id} in DB")
 
-		user.updated_at = datetime.utcnow()
+		values: dict[str, Any] = {
+			"updated_at": datetime.now(),
+			**data
+		}
+		if "password" in data:
+			values["password_hash"] = self._hash_password(data.pop("password"))
 
-		self.session.add(user)
+		statement: Update = update(User).where(User.id == id).values(**values)
+		self.session.exec(statement)
 		self.session.commit()
-		self.session.refresh(user)
 
+		statement = select(User).where(User.id == id)
+		user: User = self.session.exec(statement).first()
 		return self._user_to_public(user)
 
-	async def delete(self, user_id: int) -> bool:
-		"""Delete user"""
-		statement = select(User).where(User.id == user_id)
+	async def delete(self, id: int) -> bool:
+		logger.info(f"Deleting user with ID: {id} in DB")
+		statement = select(User).where(User.id == id)
 		user = self.session.exec(statement).first()
 
 		if not user:
@@ -175,13 +163,3 @@ class SqlRepository(RepositoryInterface):
 		self.session.delete(user)
 		self.session.commit()
 		return True
-
-	async def exists_by_username(self, username: str) -> bool:
-		statement = select(User).where(User.username == username)
-		user = self.session.exec(statement).first()
-		return user is not None
-
-	async def exists_by_email(self, email: str) -> bool:
-		statement = select(User).where(User.email == email)
-		user = self.session.exec(statement).first()
-		return user is not None
