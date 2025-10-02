@@ -66,8 +66,7 @@ class SqlRepository(RepositoryInterface):
 		password_hash: str = hashlib.sha256((password + salt).encode()).hexdigest()
 		return f"{salt}${password_hash}"
 
-	def _verify_password(self, password: str, hashed_password: str) -> bool:
-		"""Verify password against stored hash"""
+	async def _verify_password(self, password: str, hashed_password: str) -> bool:
 		try:
 			salt, stored_hash = hashed_password.split('$', 1)
 			password_hash = hashlib.sha256((password + salt).encode()).hexdigest()
@@ -133,6 +132,12 @@ class SqlRepository(RepositoryInterface):
 		if user:
 			return self._user_to_public(user)
 		return None
+
+	async def get_by_username(self, username: str) -> Optional[UserPublic]:
+		logger.info(f"Retrieving user with username: {username} from DB")
+		statement = select(User).where(User.username == username)
+		user: Optional[User] = self.session.exec(statement).first()
+		return user or None
 
 	async def patch(self, id: int, data: dict[str, Any]) -> UserPublic:
 		logger.info(f"Updating user with ID: {id} in DB")

@@ -60,6 +60,8 @@ app.include_router(router=users_router)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(ValidationError, validation_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(InvalidTokenError, jwt_exception_handler)
+app.add_exception_handler(ExpiredSignatureError, jwt_exception_handler)
 
 
 ###############################################################################

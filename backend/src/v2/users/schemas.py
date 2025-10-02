@@ -29,3 +29,6 @@ class PatchUserRequest(BaseModel):
 ###############################################################################
 ################################# Responses ###################################
 ###############################################################################
+class AuthUserResponse(BaseModel):
+	access_token: str
+	token_type: str = Field(default="Bearer")

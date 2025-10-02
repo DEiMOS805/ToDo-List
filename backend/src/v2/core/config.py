@@ -43,3 +43,6 @@ SCHEMAS_CONFIG: dict[str, Any] = {"extra": "forbid"}
 
 # Responses
 RESPONSE_INDENT: int = 4
+
+# Auth
+ACCESS_TOKEN_EXPIRE_MINUTES: int = 30

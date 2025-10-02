@@ -2,6 +2,7 @@ from pydantic_core import ValidationError
 from fastapi.responses import JSONResponse
 from fastapi import HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
+from jwt import InvalidTokenError, ExpiredSignatureError
 
 
 ###############################################################################
@@ -41,4 +42,18 @@ async def validation_exception_handler(
 				exception.errors()
 			))
 		},
+	)
+
+
+###############################################################################
+##################################### JWT #####################################
+###############################################################################
+async def jwt_exception_handler(
+	request: Request,
+	exception: InvalidTokenError | ExpiredSignatureError
+) -> JSONResponse:
+
+	return JSONResponse(
+		status_code=status.HTTP_401_UNAUTHORIZED,
+		content={"success": False, "message": str(exception)},
 	)

@@ -1,13 +1,14 @@
 from logging import Logger, getLogger
 from fastapi.responses import JSONResponse
 from typing import Any, Optional, Annotated
-from fastapi import APIRouter, Query, Path, Body, status, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Query, Path, status, Depends, HTTPException
 
 from .config import *
 from .schemas import *
 from .service import Service
 from .models import UserPublic
-from .dependencies import get_service
+from .dependencies import get_service, get_current_active_user
 
 from .. core.config import *
 from .. core.schemas import *
@@ -38,6 +39,7 @@ async def create_user(
 	request: CreateUserRequest,
 	service: Service = Depends(get_service)
 ) -> JSONResponse:
+
 	try:
 		logger.info("Received request to create user")
 		response: UserPublic | JSONResponse = await service.create(request)
@@ -50,6 +52,52 @@ async def create_user(
 			status_code=status.HTTP_201_CREATED,
 			message="User created successfully",
 			data=response.model_dump(mode="json")
+		)
+
+	except Exception as error:
+		return make_error_response(
+			logger=logger,
+			type=type(error).__name__,
+			error=error
+		)
+
+
+@router.post(
+	path="/auth",
+	summary="Authenticates a user",
+	response_model=dict[str, Any],
+	status_code=status.HTTP_200_OK,
+	responses=get_model_schema_for_docs(
+		model=BaseResponse,
+		responses={
+			201: "User authenticated successfully",
+			401: "Unauthorized: Invalid username or password",
+			404: "User not found",
+			422: "Unprocessable Entity: Validation Error",
+			500: "Internal Server Error"
+		}
+	)
+)
+async def auth_user(
+	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+	service: Service = Depends(get_service)
+) -> JSONResponse:
+
+	try:
+		logger.info("Received request to authenticate user")
+		response: AuthUserResponse | JSONResponse = await service.auth(
+			username=form_data.username,
+			password=form_data.password
+		)
+
+		if isinstance(response, JSONResponse):
+			return response
+
+		return make_response(
+			logger=logger,
+			status_code=status.HTTP_201_CREATED,
+			message="User authenticated successfully",
+			data=response.model_dump()
 		)
 
 	except Exception as error:
@@ -77,11 +125,14 @@ async def create_user(
 async def get_all_users(
 	offset: Annotated[int, Query(ge=0)] = PAGINATION_OFFSET,
 	limit: Annotated[int, Query(ge=1)] = PAGINATION_LIMIT,
-	service: Service = Depends(get_service)
+	service: Service = Depends(get_service),
+	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
+
 	try:
 		logger.info("Received request to get all users")
 		response: list[Optional[UserPublic]] | JSONResponse = await service.get_all(
+			current_user=current_user,
 			offset=offset,
 			limit=limit
 		)
@@ -135,12 +186,16 @@ async def get_all_users(
 )
 async def get_user(
 	id: Annotated[int, Path(gt=0)],
-	service: Service = Depends(get_service)
+	service: Service = Depends(get_service),
+	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
 
 	try:
 		logger.info(f"Received request to get user by ID: {id}")
-		response: UserPublic | JSONResponse = await service.get(id)
+		response: UserPublic | JSONResponse = await service.get(
+			current_user=current_user,
+			id=id
+		)
 
 		if isinstance(response, JSONResponse):
 			return response
@@ -182,12 +237,17 @@ async def get_user(
 async def patch_user(
 	id: Annotated[int, Path(gt=0)],
 	request: PatchUserRequest,
-	service: Service = Depends(get_service)
+	service: Service = Depends(get_service),
+	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
 
 	try:
 		logger.info(f"Received request to update user with ID: {id}")
-		response: UserPublic | JSONResponse = await service.patch(id, request)
+		response: UserPublic | JSONResponse = await service.patch(
+			current_user=current_user,
+			id=id,
+			data=request
+		)
 
 		if isinstance(response, JSONResponse):
 			return response
@@ -225,12 +285,16 @@ async def patch_user(
 )
 async def delete_user(
 	id: Annotated[int, Path(gt=0)],
-	service: Service = Depends(get_service)
+	service: Service = Depends(get_service),
+	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
 
 	try:
 		logger.info(f"Received request to delete user with ID: {id}")
-		response: bool | JSONResponse = await service.delete(id)
+		response: bool | JSONResponse = await service.delete(
+			current_user=current_user,
+			id=id
+		)
 
 		if isinstance(response, JSONResponse):
 			return response
