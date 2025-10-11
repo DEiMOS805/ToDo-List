@@ -23,19 +23,10 @@ class User(UserBase, table=True):
 	created_at: datetime = Field(default_factory=datetime.now)
 	updated_at: datetime = Field(default_factory=datetime.now)
 
-	# class Config:
-	# 	from_attributes = True
-
-	# todos: list["ToDo"] = Relationship(back_populates="users")
+	todos: list["ToDo"] = Relationship(back_populates="users")
 
 
 class UserPublic(UserBase):
 	id: int = Field(gt=0)
 	created_at: datetime
 	updated_at: datetime
-
-	# class Config:
-	# 	from_attributes = True
-	# 	json_encoders = {
-	# 		datetime: lambda v: v.isoformat() if v else None
-	# 	}

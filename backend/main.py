@@ -1,4 +1,6 @@
+from os import getenv
 from logging import Logger
+from dotenv import load_dotenv
 from pydantic_core import ValidationError
 from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
@@ -8,22 +10,32 @@ from fastapi.exceptions import RequestValidationError
 
 from .src.v2.core.config import *
 from .src.v2.core.error_handlers import *
+from .src.v2.core.database import db_config
 from .src.v2.core.schemas import BaseResponse
 from .src.v2.core.logging import setup_logging
-from .src.v2.core.database import db_config
 
+from .src.v2.todos.router import router as todos_router
 from .src.v2.users.router import router as users_router
-# from .src.v2.todos import router as todos_router
 
 
 ###############################################################################
 ################################# Instances ###################################
 ###############################################################################
+load_dotenv(DOTENV_ABSPATH)
 logger: Logger = setup_logging()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
 	# ON STARTUP
+	logger.info("Verifying secret keys...")
+	if not all([
+		getenv("DB_URL", None),
+		getenv("JWT_SECRET", None),
+		getenv("JWT_ALGORITHM", None),
+		getenv("FERNET_SECRET", None)
+	]):
+		raise ValueError("One or more required environment variables are missing")
+
 	logger.info("Initializing database tables...")
 	db_config.create_db_and_tables()
 	logger.info("Database tables initialized successfully!")
@@ -51,6 +63,7 @@ app.add_middleware(
 ###############################################################################
 ############################### Route Handlers ################################
 ###############################################################################
+app.include_router(router=todos_router)
 app.include_router(router=users_router)
 
 

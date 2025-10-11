@@ -6,9 +6,9 @@ from typing import Any, Generator, Optional
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 
-from .service import Service
+from .service import UserService
 from .models import UserPublic
-from .repository import RepositoryInterface, SqlRepository
+from .repository import UserRepositoryInterface, UserSqlRepository
 
 from ..core.database import db_config
 from ..core.config import DOTENV_ABSPATH
@@ -26,16 +26,16 @@ def get_db_session() -> Generator[Session, Any, None]:
 
 def get_repository(
 	session: Session = Depends(get_db_session)
-) -> RepositoryInterface:
+) -> UserRepositoryInterface:
 
-	return SqlRepository(session)
+	return UserSqlRepository(session)
 
 
 def get_service(
-	repository: RepositoryInterface = Depends(get_repository)
-) -> Service:
+	repository: UserRepositoryInterface = Depends(get_repository)
+) -> UserService:
 
-	return Service(repository)
+	return UserService(repository)
 
 
 ###############################################################################
@@ -44,7 +44,7 @@ def get_service(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth")
 
 async def get_current_active_user(
-	service: Service = Depends(get_service),
+	service: UserService = Depends(get_service),
 	token: str = Depends(oauth2_scheme)
 ) -> UserPublic:
 

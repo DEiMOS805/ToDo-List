@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query, Path, status, Depends, HTTPException
 
 from .config import *
 from .schemas import *
-from .service import Service
+from .service import UserService
 from .models import UserPublic
 from .dependencies import get_service, get_current_active_user
 
@@ -15,7 +15,7 @@ from .. core.schemas import *
 from .. core.service import *
 
 
-logger: Logger = getLogger(f"{LOGGING_PROJECT_NAME}.{__name__.split('.')[-1]}")
+logger: Logger = getLogger(f"{LOGGING_PROJECT_NAME}.{'.'.join(__name__.split('.')[-2:])}")
 router = APIRouter(prefix=f"/{ROUTER_PREFIX}", tags=["Users"])
 
 
@@ -37,7 +37,7 @@ router = APIRouter(prefix=f"/{ROUTER_PREFIX}", tags=["Users"])
 )
 async def create_user(
 	request: CreateUserRequest,
-	service: Service = Depends(get_service)
+	service: UserService = Depends(get_service)
 ) -> JSONResponse:
 
 	try:
@@ -80,7 +80,7 @@ async def create_user(
 )
 async def auth_user(
 	form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-	service: Service = Depends(get_service)
+	service: UserService = Depends(get_service)
 ) -> JSONResponse:
 
 	try:
@@ -125,7 +125,7 @@ async def auth_user(
 async def get_all_users(
 	offset: Annotated[int, Query(ge=0)] = PAGINATION_OFFSET,
 	limit: Annotated[int, Query(ge=1)] = PAGINATION_LIMIT,
-	service: Service = Depends(get_service),
+	service: UserService = Depends(get_service),
 	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
 
@@ -186,7 +186,7 @@ async def get_all_users(
 )
 async def get_user(
 	id: Annotated[int, Path(gt=0)],
-	service: Service = Depends(get_service),
+	service: UserService = Depends(get_service),
 	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
 
@@ -194,7 +194,7 @@ async def get_user(
 		logger.info(f"Received request to get user by ID: {id}")
 		response: UserPublic | JSONResponse = await service.get(
 			current_user=current_user,
-			id=id
+			user_id=id
 		)
 
 		if isinstance(response, JSONResponse):
@@ -237,7 +237,7 @@ async def get_user(
 async def patch_user(
 	id: Annotated[int, Path(gt=0)],
 	request: PatchUserRequest,
-	service: Service = Depends(get_service),
+	service: UserService = Depends(get_service),
 	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
 
@@ -245,8 +245,8 @@ async def patch_user(
 		logger.info(f"Received request to update user with ID: {id}")
 		response: UserPublic | JSONResponse = await service.patch(
 			current_user=current_user,
-			id=id,
-			data=request
+			user_id=id,
+			user_data=request
 		)
 
 		if isinstance(response, JSONResponse):
@@ -285,7 +285,7 @@ async def patch_user(
 )
 async def delete_user(
 	id: Annotated[int, Path(gt=0)],
-	service: Service = Depends(get_service),
+	service: UserService = Depends(get_service),
 	current_user: UserPublic = Depends(get_current_active_user)
 ) -> JSONResponse:
 
@@ -293,7 +293,7 @@ async def delete_user(
 		logger.info(f"Received request to delete user with ID: {id}")
 		response: bool | JSONResponse = await service.delete(
 			current_user=current_user,
-			id=id
+			user_id=id
 		)
 
 		if isinstance(response, JSONResponse):

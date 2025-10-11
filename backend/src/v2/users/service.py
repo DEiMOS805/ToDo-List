@@ -7,7 +7,7 @@ from logging import Logger, getLogger
 from datetime import datetime, timedelta
 
 from .models import UserCreate, UserPublic
-from .repository import RepositoryInterface
+from .repository import UserRepositoryInterface
 from .schemas import CreateUserRequest, AuthUserResponse
 
 from .config import *
@@ -17,16 +17,16 @@ from ..core.service import *
 
 
 load_dotenv(DOTENV_ABSPATH)
-logger: Logger = getLogger(f"{LOGGING_PROJECT_NAME}.{__name__.split('.')[-1]}")
+logger: Logger = getLogger(f"{LOGGING_PROJECT_NAME}.{'.'.join(__name__.split('.')[-2:])}")
 
 
-class Service:
-	def __init__(self, repository: RepositoryInterface) -> None:
-		self.repository: RepositoryInterface = repository
+class UserService:
+	def __init__(self, repository: UserRepositoryInterface) -> None:
+		self.repository: UserRepositoryInterface = repository
 
-	async def create_access_token(self, data: dict) -> AuthUserResponse:
+	async def create_access_token(self, user_data: dict) -> AuthUserResponse:
 		logger.info("Creating access token")
-		to_encode: dict[str, Any] = data.copy()
+		to_encode: dict[str, Any] = user_data.copy()
 
 		token_expire = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 		expire: datetime = datetime.now() + token_expire
@@ -41,41 +41,41 @@ class Service:
 		logger.debug(f"Access token created successfully: {response.model_dump()}")
 		return response
 
-	async def create(self, request: CreateUserRequest) -> UserPublic | JSONResponse:
+	async def create(self, user_request: CreateUserRequest) -> UserPublic | JSONResponse:
 		"""
 		Create a new user with business logic validation.
 		This is the application service that orchestrates domain operations.
 		"""
 		logger.info(
 			"Creating user: "
-			f"username={request.username}, email={request.email}"
+			f"username={user_request.username}, email={user_request.email}"
 		)
 
 		# Business rule: Check if user already exists by username
-		if await self.repository.exists_by_username(request.username):
-			logger.warning(f"User creation failed: Username '{request.username}' already exists")
+		if await self.repository.exists_by_username(user_request.username):
+			logger.warning(f"User creation failed: Username '{user_request.username}' already exists")
 			return make_response(
 				logger=logger,
 				success=False,
 				status_code=status.HTTP_409_CONFLICT,
-				message=f"User {request.username} already exists",
+				message=f"User {user_request.username} already exists",
 			)
 
 		# Business rule: Check if user already exists by email
-		if await self.repository.exists_by_email(request.email):
-			logger.warning(f"User creation failed: Email '{request.email}' already exists")
+		if await self.repository.exists_by_email(user_request.email):
+			logger.warning(f"User creation failed: Email '{user_request.email}' already exists")
 			return make_response(
 				logger=logger,
 				success=False,
 				status_code=status.HTTP_409_CONFLICT,
-				message=f"User with email {request.email} already exists"
+				message=f"User with email {user_request.email} already exists"
 			)
 
 		user: UserCreate = UserCreate(
-			username=request.username,
-			email=request.email,
-			password=request.password,
-			is_admin=request.is_admin
+			username=user_request.username,
+			email=user_request.email,
+			password=user_request.password,
+			is_admin=user_request.is_admin
 		)
 
 		try:
@@ -111,7 +111,11 @@ class Service:
 					message="Incorrect username or password",
 				)
 
-			auth: AuthUserResponse = await self.create_access_token(data={"id": user.id})
+			auth: AuthUserResponse = await self.create_access_token(
+				user_data={
+					"id": user.id
+				}
+			)
 			logger.info(f"User {username} authenticated successfully")
 			return auth
 
@@ -157,12 +161,12 @@ class Service:
 				error=f"Internal server error while retrieving users: {error}"
 			)
 
-	async def get(self, current_user: UserPublic, id: int) -> Optional[UserPublic]:
-		logger.info(f"Retrieving user with ID: {id}")
+	async def get(self, current_user: UserPublic, user_id: int) -> Optional[UserPublic]:
+		logger.info(f"Retrieving user with ID: {user_id}")
 
 		try:
 			# Business rule: Check if current user is trying to access their own data or is admin
-			if not current_user.is_admin and current_user.id != id:
+			if not current_user.is_admin and current_user.id != user_id:
 				return make_response(
 					logger=logger,
 					success=False,
@@ -170,37 +174,37 @@ class Service:
 					message=f"Given user does not have the necessary rights for this operation",
 				)
 
-			user: Optional[UserPublic] = await self.repository.get(id)
+			user: Optional[UserPublic] = await self.repository.get(user_id)
 			if not user:
-				logger.warning(f"User with ID {id} not found")
+				logger.warning(f"User with ID {user_id} not found")
 				return make_response(
 					logger=logger,
 					success=False,
 					status_code=status.HTTP_404_NOT_FOUND,
-					message=f"User with ID {id} not found",
+					message=f"User with ID {user_id} not found",
 				)
 
-			logger.info(f"User with ID {id} retrieved successfully: {user.username}")
+			logger.info(f"User with ID {user_id} retrieved successfully: {user.username}")
 			return user
 
 		except Exception as error:
 			return make_error_response(
 				logger=logger,
 				type=type(error).__name__,
-				error=f"Internal server error while retrieving user with id {id}: {error}"
+				error=f"Internal server error while retrieving user with id {user_id}: {error}"
 			)
 
 	async def patch(
 		self,
 		current_user: UserPublic,
-		id: int,
-		data: dict[str, Any]
+		user_id: int,
+		user_data: dict[str, Any]
 	) -> Optional[UserPublic]:
-		logger.info(f"Updating user with ID: {id}")
+		logger.info(f"Updating user with ID: {user_id}")
 
 		try:
 			# Business rule: Check if current user is trying to access their own data or is admin
-			if not current_user.is_admin and current_user.id != id:
+			if not current_user.is_admin and current_user.id != user_id:
 				return make_response(
 					logger=logger,
 					success=False,
@@ -209,44 +213,44 @@ class Service:
 				)
 
 			# Business rule: Check if user already exists by email
-			if await self.repository.exists_by_email(data.email):
-				logger.warning(f"User creation failed: Email '{data.email}' already exists")
+			if await self.repository.exists_by_email(user_data.email):
+				logger.warning(f"User creation failed: Email '{user_data.email}' already exists")
 				return make_response(
 					logger=logger,
 					success=False,
 					status_code=status.HTTP_409_CONFLICT,
-					message=f"User with email {data.email} already exists"
+					message=f"User with email {user_data.email} already exists"
 				)
 
-			user: Optional[UserPublic] = await self.repository.get(id)
+			user: Optional[UserPublic] = await self.repository.get(user_id)
 			if not user:
-				logger.warning(f"User with ID {id} not found")
+				logger.warning(f"User with ID {user_id} not found")
 				return make_response(
 					logger=logger,
 					success=False,
 					status_code=status.HTTP_404_NOT_FOUND,
-					message=f"User with ID {id} not found",
+					message=f"User with ID {user_id} not found",
 				)
 
-			user_data: dict[str, Any] = data.model_dump(exclude_unset=True)
-			user: Optional[UserPublic] = await self.repository.patch(id, user_data)
+			user_data: dict[str, Any] = user_data.model_dump(exclude_unset=True)
+			user: Optional[UserPublic] = await self.repository.patch(user_id, user_data)
 
-			logger.info(f"User with ID {id} updated successfully: {user.username}")
+			logger.info(f"User with ID {user_id} updated successfully: {user.username}")
 			return user
 
 		except Exception as error:
 			return make_error_response(
 				logger=logger,
 				type=type(error).__name__,
-				error=f"Internal server error while updating user with id {id}: {error}"
+				error=f"Internal server error while updating user with id {user_id}: {error}"
 			)
 
-	async def delete(self, current_user: UserPublic, id: int) -> bool | JSONResponse:
-		logger.info(f"Deleting user with ID: {id}")
+	async def delete(self, current_user: UserPublic, user_id: int) -> bool | JSONResponse:
+		logger.info(f"Deleting user with ID: {user_id}")
 
 		try:
 			# Business rule: Check if current user is trying to access their own data or is admin
-			if not current_user.is_admin and current_user.id != id:
+			if not current_user.is_admin and current_user.id != user_id:
 				return make_response(
 					logger=logger,
 					success=False,
@@ -254,32 +258,32 @@ class Service:
 					message=f"Given user does not have the necessary rights for this operation",
 				)
 
-			user: Optional[UserPublic] = await self.repository.get(id)
+			user: Optional[UserPublic] = await self.repository.get(user_id)
 			if not user:
-				logger.warning(f"User with ID {id} not found")
+				logger.warning(f"User with ID {user_id} not found")
 				return make_response(
 					logger=logger,
 					success=False,
 					status_code=status.HTTP_404_NOT_FOUND,
-					message=f"User with ID {id} not found",
+					message=f"User with ID {user_id} not found",
 				)
 
-			result: bool = await self.repository.delete(id)
+			result: bool = await self.repository.delete(user_id)
 			if not result:
-				logger.error(f"Failed to delete user with ID {id}")
+				logger.error(f"Failed to delete user with ID {user_id}")
 				return make_response(
 					logger=logger,
 					success=False,
 					status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-					message=f"Failed to delete user with ID {id}",
+					message=f"Failed to delete user with ID {user_id}",
 				)
 
-			logger.info(f"User with ID {id} deleted successfully")
+			logger.info(f"User with ID {user_id} deleted successfully")
 			return True
 
 		except Exception as error:
 			return make_error_response(
 				logger=logger,
 				type=type(error).__name__,
-				error=f"Internal server error while updating user with id {id}: {error}"
+				error=f"Internal server error while updating user with id {user_id}: {error}"
 			)

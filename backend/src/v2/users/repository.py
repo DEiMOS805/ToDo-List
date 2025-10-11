@@ -1,7 +1,7 @@
-import hashlib
-import secrets
+from hashlib import sha256
 from typing import Optional
 from datetime import datetime
+from secrets import token_hex
 from sqlalchemy import Update
 from abc import ABC, abstractmethod
 from logging import Logger, getLogger
@@ -13,11 +13,11 @@ from .models import User, UserCreate, UserPublic
 from .. core.config import *
 
 
-logger: Logger = getLogger(f"{LOGGING_PROJECT_NAME}.{__name__.split('.')[-1]}")
+logger: Logger = getLogger(f"{LOGGING_PROJECT_NAME}.{'.'.join(__name__.split('.')[-2:])}")
 
 
 
-class RepositoryInterface(ABC):
+class UserRepositoryInterface(ABC):
 	"""
 	Repository interface following DDD principles.
 	This defines the contract for user persistence operations.
@@ -52,9 +52,9 @@ class RepositoryInterface(ABC):
 		pass
 
 
-class SqlRepository(RepositoryInterface):
+class UserSqlRepository(UserRepositoryInterface):
 	"""
-	SQLAlchemy implementation of RepositoryInterface.
+	SQLAlchemy implementation of UserRepositoryInterface.
 	This is the infrastructure layer implementation.
 	"""
 
@@ -62,14 +62,14 @@ class SqlRepository(RepositoryInterface):
 		self.session: Session = session
 
 	def _hash_password(self, password: str) -> str:
-		salt: str = secrets.token_hex(16)
-		password_hash: str = hashlib.sha256((password + salt).encode()).hexdigest()
+		salt: str = token_hex(16)
+		password_hash: str = sha256((password + salt).encode()).hexdigest()
 		return f"{salt}${password_hash}"
 
 	async def _verify_password(self, password: str, hashed_password: str) -> bool:
 		try:
 			salt, stored_hash = hashed_password.split('$', 1)
-			password_hash = hashlib.sha256((password + salt).encode()).hexdigest()
+			password_hash = sha256((password + salt).encode()).hexdigest()
 			return password_hash == stored_hash
 		except ValueError:
 			return False
@@ -95,15 +95,15 @@ class SqlRepository(RepositoryInterface):
 			updated_at=user.updated_at
 		)
 
-	async def create(self, data: UserCreate) -> UserPublic:
+	async def create(self, user_data: UserCreate) -> UserPublic:
 		logger.info(f"Creating user in DB")
-		hashed_password: str = self._hash_password(data.password)
+		hashed_password: str = self._hash_password(user_data.password)
 
 		db_user = User(
-			username=data.username,
-			email=data.email,
+			username=user_data.username,
+			email=user_data.email,
 			password_hash=hashed_password,
-			is_admin=data.is_admin
+			is_admin=user_data.is_admin
 		)
 
 		self.session.add(db_user)
@@ -124,9 +124,9 @@ class SqlRepository(RepositoryInterface):
 
 		return [self._user_to_public(user) for user in users]
 
-	async def get(self, id: int) -> Optional[UserPublic]:
-		logger.info(f"Retrieving user with ID: {id} from DB")
-		statement = select(User).where(User.id == id)
+	async def get(self, user_id: int) -> Optional[UserPublic]:
+		logger.info(f"Retrieving user with ID: {user_id} from DB")
+		statement = select(User).where(User.id == user_id)
 		user: Optional[User] = self.session.exec(statement).first()
 
 		if user:
@@ -139,27 +139,27 @@ class SqlRepository(RepositoryInterface):
 		user: Optional[User] = self.session.exec(statement).first()
 		return user or None
 
-	async def patch(self, id: int, data: dict[str, Any]) -> UserPublic:
-		logger.info(f"Updating user with ID: {id} in DB")
+	async def patch(self, user_id: int, user_data: dict[str, Any]) -> UserPublic:
+		logger.info(f"Updating user with ID: {user_id} in DB")
 
 		values: dict[str, Any] = {
 			"updated_at": datetime.now(),
-			**data
+			**user_data
 		}
-		if "password" in data:
-			values["password_hash"] = self._hash_password(data.pop("password"))
+		if "password" in user_data:
+			values["password_hash"] = self._hash_password(user_data.pop("password"))
 
-		statement: Update = update(User).where(User.id == id).values(**values)
+		statement: Update = update(User).where(User.id == user_id).values(**values)
 		self.session.exec(statement)
 		self.session.commit()
 
-		statement = select(User).where(User.id == id)
+		statement = select(User).where(User.id == user_id)
 		user: User = self.session.exec(statement).first()
 		return self._user_to_public(user)
 
-	async def delete(self, id: int) -> bool:
-		logger.info(f"Deleting user with ID: {id} in DB")
-		statement = select(User).where(User.id == id)
+	async def delete(self, user_id: int) -> bool:
+		logger.info(f"Deleting user with ID: {user_id} in DB")
+		statement = select(User).where(User.id == user_id)
 		user = self.session.exec(statement).first()
 
 		if not user:
