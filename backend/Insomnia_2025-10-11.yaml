@@ -1,362 +1,19 @@
 type: collection.insomnia.rest/5.0
 name: To-Do List
 meta:
-  id: wrk_ab2a04c29433490e91c91d6a97d5c8db
-  created: 1740455272081
-  modified: 1740455272081
+  id: wrk_c2f1714be2234d7fb846fe1c5e7a943b
+  created: 1759727633132
+  modified: 1759727633132
+  description: ""
 collection:
-  - name: todos
-    meta:
-      id: fld_0aa8f02a581844c4ac2f858ad52558f6
-      created: 1741237248534
-      modified: 1741670347441
-      sortKey: -1740457320746.4375
-    children:
-      - url: "{{ _.base_url }}/todos?offset=0"
-        name: / todos
-        meta:
-          id: req_8760b3ddc59c413386f32aa7462f7d09
-          created: 1740457327806
-          modified: 1741670390030
-          isPrivate: false
-          sortKey: -1740457337097
-        method: GET
-        headers:
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          prefix: Bearer
-          token: "{{ _.jwt }}"
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/1/todos?offset=0&limit=10"
-        name: / users / { user_id } / todos
-        meta:
-          id: req_51536d581294438b8f4221d0fd26ea22
-          created: 1741237248534
-          modified: 1741670480681
-          isPrivate: false
-          sortKey: -1740457336997
-        method: GET
-        headers:
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          prefix: Bearer
-          token: "{{ _.jwt }}"
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/1/todos"
-        name: / users / { user_id } / todos
-        meta:
-          id: req_aecc490f3f184bfba99f750a34032f33
-          created: 1741237248535
-          modified: 1741754639857
-          isPrivate: false
-          sortKey: -1740457336972
-        method: POST
-        body:
-          mimeType: application/json
-          text: |-
-            {
-            	"description": "the second todo",
-            	"done": false
-            }
-        headers:
-          - name: Content-Type
-            value: application/json
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          token: "{{ _.jwt }}"
-          prefix: Bearer
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/1/todos/1"
-        name: / users / { user_id } / todos / { todo_id }
-        meta:
-          id: req_4034c9bcd10744d5b2684d874d7b8754
-          created: 1741237248536
-          modified: 1741754750694
-          isPrivate: false
-          sortKey: -1740457336747
-        method: PATCH
-        body:
-          mimeType: application/json
-          text: |-
-            {
-            	"description": "the first todo patched"
-            }
-        headers:
-          - name: Content-Type
-            value: application/json
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          token: "{{ _.jwt }}"
-          prefix: Bearer
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/1/todos/2"
-        name: / users / { user_id } / todos / { todo_id }
-        meta:
-          id: req_4bd43d3fe9d04e3a9b0493548dcafe70
-          created: 1741237248536
-          modified: 1741754646156
-          isPrivate: false
-          sortKey: -1740457336947
-        method: GET
-        headers:
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          token: "{{ _.jwt }}"
-          prefix: Bearer
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/1/todos/1"
-        name: / users / { user_id } / todos / { todo_id }
-        meta:
-          id: req_ea3f6debda8540c9b8eb9fd5e5a88223
-          created: 1741237248537
-          modified: 1741754074176
-          isPrivate: false
-          sortKey: -1740457336647
-        method: DELETE
-        headers:
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          token: "{{ _.jwt }}"
-          prefix: Bearer
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-  - name: users
-    meta:
-      id: fld_2677115ea10346b9b1d32d3957830e47
-      created: 1741237738707
-      modified: 1741237803871
-      sortKey: -1740457320747.2188
-    children:
-      - url: "{{ _.base_url }}/users/4"
-        name: / users / { user_id }
-        meta:
-          id: req_167648b87fa644b6b6657f0de9c4a71d
-          created: 1740531217037
-          modified: 1741665619305
-          isPrivate: false
-          sortKey: -1741237745609
-        method: GET
-        headers:
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          prefix: Bearer
-          token: "{{ _.jwt }}"
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users"
-        name: / users
-        meta:
-          id: req_424330cee6454dddae125d51a70111bb
-          created: 1740531217037
-          modified: 1741670424604
-          isPrivate: false
-          sortKey: -1741237745709
-        method: POST
-        body:
-          mimeType: application/json
-          text: |-
-            {
-            	"username": "Nandita",
-            	"email": "nandita@gmail.com",
-            	"password": "mequierocasarcongael",
-            	"is_admin": true
-            }
-        headers:
-          - name: Content-Type
-            value: application/json
-          - name: User-Agent
-            value: insomnia/10.3.1
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users"
-        name: / users
-        meta:
-          id: req_ffc109c91a7a461db0de76f92f8f02ae
-          created: 1740531217037
-          modified: 1741582722160
-          isPrivate: false
-          sortKey: -1741237745809
-        method: GET
-        headers:
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          prefix: Bearer
-          token: "{{ _.jwt }}"
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/3"
-        name: / users / { user_id }
-        meta:
-          id: req_8087cff66da14ac78bb3ec80d950a22a
-          created: 1740531217038
-          modified: 1741665656258
-          isPrivate: false
-          sortKey: -1741237745409
-        method: DELETE
-        headers:
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          prefix: Bearer
-          token: "{{ _.jwt }}"
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/4"
-        name: / users / { user_id }
-        meta:
-          id: req_89d445c6213148ce9579fb7ad2bad22a
-          created: 1740531217038
-          modified: 1741665640384
-          isPrivate: false
-          sortKey: -1741237745509
-        method: PATCH
-        body:
-          mimeType: application/json
-          text: |-
-            {
-            	"email": "ferchaa@gmail.com"
-            }
-        headers:
-          - name: Content-Type
-            value: application/json
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: bearer
-          prefix: Bearer
-          token: "{{ _.jwt }}"
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-      - url: "{{ _.base_url }}/users/auth"
-        name: / auth
-        meta:
-          id: req_5820d7c03594410398c44625e8b5568d
-          created: 1741568867512
-          modified: 1741741049687
-          isPrivate: false
-          sortKey: -1741568867512
-        method: POST
-        body:
-          mimeType: multipart/form-data
-          params:
-            - id: pair_68c9d95edadf49989bbe5634dd6f1883
-              name: username
-              value: Nandita
-              disabled: false
-            - id: pair_89cd9e243d4a4ef39477f0785e2cf42c
-              name: password
-              value: mequierocasarcongael
-              disabled: false
-        headers:
-          - name: Content-Type
-            value: multipart/form-data
-          - name: User-Agent
-            value: insomnia/10.3.1
-        authentication:
-          type: none
-        settings:
-          renderRequestBody: true
-          encodeUrl: true
-          followRedirects: global
-          cookies:
-            send: true
-            store: true
-          rebuildPath: true
-  - url: "{{ _.base_url }}/"
+  - url: "{{ _.base_url }}"
     name: /
     meta:
-      id: req_bdeb90d9109f4edca3710c67f4c82813
+      id: req_d5ec940cbd07486fa53b6105879c77e4
       created: 1740455274973
-      modified: 1740457324331
+      modified: 1759883032394
       isPrivate: false
+      description: ""
       sortKey: -1740457320798
     method: GET
     headers:
@@ -373,10 +30,11 @@ collection:
   - url: "{{ _.base_url }}/docs"
     name: /docs
     meta:
-      id: req_c32e46ee93da4eefb078c9cce917a308
+      id: req_ea64ce1f3170472e9bd2d99494fe6a10
       created: 1740457520842
       modified: 1741405817048
       isPrivate: false
+      description: ""
       sortKey: -1740457320748
     method: GET
     headers:
@@ -390,25 +48,424 @@ collection:
         send: true
         store: true
       rebuildPath: true
+  - name: todos
+    meta:
+      id: fld_711b071616a44e01bdbb73f380966a04
+      created: 1741237248534
+      modified: 1741670347441
+      sortKey: -1740457320746.4375
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/todos?offset=0"
+        name: / todos
+        meta:
+          id: req_4c49e84dbd234b27be498277e38b4d83
+          created: 1740457327806
+          modified: 1760162417193
+          isPrivate: false
+          description: ""
+          sortKey: -1740457337097
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/todos/users/:user_id?offset=0&limit=10"
+        name: / todos / users / { id }
+        meta:
+          id: req_3406044ac79b4cdda87c93d3d61662fe
+          created: 1741237248534
+          modified: 1760162448230
+          isPrivate: false
+          description: ""
+          sortKey: -1740457336997
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: user_id
+            value: "1"
+      - url: "{{ _.base_url }}/todos"
+        name: / todos
+        meta:
+          id: req_87933205d6a94313b954b8d79783bde5
+          created: 1741237248535
+          modified: 1760162549984
+          isPrivate: false
+          description: ""
+          sortKey: -1740457337197
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"description": "the first todo",
+            	"done": false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/todos/:todo_id/users/:user_id"
+        name: / todos / { id } / users / { id }
+        meta:
+          id: req_ab672d14b26d4aed85a6c6fc68637a1d
+          created: 1741237248536
+          modified: 1760208604239
+          isPrivate: false
+          description: ""
+          sortKey: -1740457336947
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: todo_id
+            value: "1"
+          - name: user_id
+            value: "1"
+      - url: "{{ _.base_url }}/todos/:todo_id/users/:user_id"
+        name: / todos / { id } / users / { id }
+        meta:
+          id: req_eae633d85b1f4edbaf91630bdbb108a0
+          created: 1741237248536
+          modified: 1760208848696
+          isPrivate: false
+          description: ""
+          sortKey: -1740457336747
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"description": "first todo patched"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: todo_id
+            value: "10"
+          - name: user_id
+            value: "1"
+      - url: "{{ _.base_url }}/todos/:todo_id/users/:user_id"
+        name: / todos / { id } / users / { id }
+        meta:
+          id: req_7248fbc586db42ba8e32df0e2835805e
+          created: 1741237248537
+          modified: 1760209439116
+          isPrivate: false
+          description: ""
+          sortKey: -1740457336647
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: todo_id
+            value: "4"
+          - name: user_id
+            value: "1"
+  - name: users
+    meta:
+      id: fld_0a70297900654701af4141215f4eb7b5
+      created: 1741237738707
+      modified: 1741237803871
+      sortKey: -1740457320747.2188
+      description: ""
+    children:
+      - url: "{{ _.base_url }}/users/:id"
+        name: / users / { id }
+        meta:
+          id: req_13fc98f3edc742189dffea680efd3110
+          created: 1740531217037
+          modified: 1759900364406
+          isPrivate: false
+          description: ""
+          sortKey: -1741237745609
+        method: GET
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: id
+            value: "1"
+      - url: "{{ _.base_url }}/{{ _.users_path }}"
+        name: / users
+        meta:
+          id: req_570939b2fdfb43e9ba0f57383a2277a6
+          created: 1740531217037
+          modified: 1760209741028
+          isPrivate: false
+          description: ""
+          sortKey: -1741237745709
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"username": "test",
+            	"email": "test@gmail.com",
+            	"password": "mequierocasarcongael",
+            	"is_admin": false
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.1
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/users/"
+        name: / users
+        meta:
+          id: req_f8001b93d85042d4b60ef85747e8fb38
+          created: 1740531217037
+          modified: 1759898625237
+          isPrivate: false
+          description: ""
+          sortKey: -1741237745809
+        method: GET
+        parameters:
+          - name: offset
+            value: "1"
+            disabled: true
+            id: pair_e89057cb26d94a0cb26e378038633613
+          - name: limit
+            value: "2"
+            disabled: true
+            id: pair_03edb6ad00f34315bac916f55199e190
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          disabled: false
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.base_url }}/users/:id"
+        name: / users / { id }
+        meta:
+          id: req_685914ab1ddd4341bfb68f49b41b8390
+          created: 1740531217038
+          modified: 1760162139476
+          isPrivate: false
+          description: ""
+          sortKey: -1741237745509
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"email": "fercha@gmail.com"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          disabled: false
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: id
+            value: "1"
+      - url: "{{ _.base_url }}/users/:id"
+        name: / users / { id }
+        meta:
+          id: req_abadc00434f148bbb9fb33be886e5ca8
+          created: 1740531217038
+          modified: 1760162173088
+          isPrivate: false
+          description: ""
+          sortKey: -1741237745409
+        method: DELETE
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: bearer
+          token: "{{ _.admin_jwt }}"
+          prefix: Bearer
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: id
+            value: "3"
+      - url: "{{ _.base_url }}/users/auth"
+        name: / auth
+        meta:
+          id: req_c649b87d9dbc4967996f73143b8890e3
+          created: 1741568867512
+          modified: 1760160792415
+          isPrivate: false
+          description: ""
+          sortKey: -1741568867512
+        method: POST
+        body:
+          mimeType: multipart/form-data
+          params:
+            - name: username
+              value: Fercha
+              description: ""
+              disabled: false
+              id: pair_68c9d95edadf49989bbe5634dd6f1883
+            - name: password
+              value: mequierocasarcongael
+              description: ""
+              disabled: false
+              id: pair_89cd9e243d4a4ef39477f0785e2cf42c
+        headers:
+          - name: Content-Type
+            value: multipart/form-data
+          - name: User-Agent
+            value: insomnia/10.3.1
+        authentication:
+          type: none
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
 cookieJar:
   name: Default Jar
   meta:
-    id: jar_d93fe93c4bdb089585e92fd47ab9c2dae1232f94
+    id: jar_4ca52b4579f947f09749a2a86508f59b
     created: 1740455272083
     modified: 1740455272083
 environments:
   name: Base Environment
   meta:
-    id: env_d93fe93c4bdb089585e92fd47ab9c2dae1232f94
+    id: env_97917a1a9778467cbd93b7c3f325ed6c
     created: 1740455272083
     modified: 1740455272083
     isPrivate: false
   subEnvironments:
     - name: To-Do List Environment
       meta:
-        id: env_575b3825b927462e924ada2a68a6ab9a
+        id: env_bd2c23fa14b64156b9d105620fc45211
         created: 1740455703736
-        modified: 1741754622531
+        modified: 1760207722489
         isPrivate: false
         sortKey: 1740455703736
       data:
@@ -416,4 +473,7 @@ environments:
         host: 127.0.0.1
         port: "8000"
         base_url: "{{ _.protocol }}://{{ _.host }}:{{ _.port }}"
-        jwt: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJOYW5kaXRhIiwiZXhwIjoxNzQxNzU2NDE1fQ.idGljWHmDWW8Sxo3KdS-31__xKDxvBtPrTY3M4K2I_0
+        admin_jwt: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZXhwIjoxNzYwMjA5NTE0fQ.mTdkSm_Td533Rwdght5zRQnTnJI_KcuvLhZnyOv6PEQ
+        non_admin_jwt: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiZXhwIjoxNzU5OTgzMjY1fQ.OXZRxmaTLBgqw7GPbizXlhoVHYK8uyoEWj6pH7QCO58
+        users_path: users
+        todos_path: todos
